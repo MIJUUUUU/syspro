@@ -1,24 +1,45 @@
 #include <stdio.h>
-#include "copy.h"
+#include <string.h>
 
-int main() {
-    char lines[5][MAX_LINE_LENGTH];
-    int numLines = 5;
+#define MAXLINE 100
 
-    printf("Enter 5 lines of text:\n");
-
+void copy(char from[], char to[]) {
     int i = 0;
-    while (i < numLines) {
-        printf("Enter line %d: ", i + 1);
-        fgets(lines[i], MAX_LINE_LENGTH, stdin);
+    while ((to[i] = from[i]) != '\0') {
         i++;
     }
+}
 
-    sortLines(lines, numLines);
+int main() {
+    char lines[5][MAXLINE];
+    int lengths[5]; 
+    int i, j;
 
-    printf("\nSorted lines:\n");
-    for (int j = 0; j < numLines; j++) {
-        printf("%s", lines[j]);
+ 
+    for (i = 0; i < 5; i++) {
+        gets(lines[i]);
+        lengths[i] = strlen(lines[i]);
+    }
+
+  
+    for (i = 0; i < 5; i++) {
+        for (j = i + 1; j < 5; j++) {
+            if (lengths[i] < lengths[j]) {
+              
+                int tempLength = lengths[i];
+                lengths[i] = lengths[j];
+                lengths[j] = tempLength;
+
+                char tempLine[MAXLINE];
+                copy(lines[i], tempLine);
+                copy(lines[j], lines[i]);
+                copy(tempLine, lines[j]);
+            }
+        }
+    }
+
+    for (i = 0; i < 5; i++) {
+        printf("%s\n", lines[i]);
     }
 
     return 0;
