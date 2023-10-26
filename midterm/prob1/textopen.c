@@ -28,16 +28,20 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-     
+      
       while (fgets(line, sizeof(line), fp) != NULL) {
-            if (print_line_numbers <3) {
+            if (print_line_numbers) {
                 printf("%d ", line_number);
             }
             printf("%s", line);
             line_number++;
         }
-
+	  
         fclose(fp);
-    }
+    
+	}
 
-    return 0
+    return 0;
+}
+
+ 
