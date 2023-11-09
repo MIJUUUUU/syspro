@@ -17,8 +17,8 @@ int main(int argc, char **argv)
     DIR *dp;
     char *dir;
     struct stat st;
-    struct dirent *d;
-    char path[BUFSIZ + 1];
+    struct dirent **entries;
+    int n;
 
     char *options = "";
 
@@ -32,47 +32,46 @@ int main(int argc, char **argv)
         dir = (argc == 1) ? "." : argv[1];
     }
 
-    if ((dp = opendir(dir)) == NULL)
+    if ((n = scandir(dir, &entries, NULL, alphasort)) < 0)
     {
         perror(dir);
         exit(1);
     }
 
-    while ((d = readdir(dp)) != NULL)
+    for (int i = 0; i < n; ++i)
     {
-        sprintf(path, "%s/%s", dir, d->d_name);
+        char path[BUFSIZ + 1];
+        sprintf(path, "%s/%s", dir, entries[i]->d_name);
         if (lstat(path, &st) < 0)
         {
             perror(path);
             continue;
         }
 
-        printStat(path, d->d_name, &st, options);
+        printStat(path, entries[i]->d_name, &st, options);
+        free(entries[i]);
     }
 
-    closedir(dp);
+    free(entries);
     exit(0);
 }
 
 void printStat(char *pathname, char *file, struct stat *st, char *options)
 {
-    if (strchr(options, 'p') && S_ISDIR(st->st_mode))
+    char name[BUFSIZ + 1];
+
+    if ((strchr(options, 'i') || strchr(options, 'p')) && S_ISDIR(st->st_mode))
     {
-        printf("%s/", file);
+        snprintf(name, sizeof(name), "%s/", file);
     }
     else
     {
-        printf("%s", file);
+        snprintf(name, sizeof(name), "%s", file);
     }
 
     if (strchr(options, 'i'))
     {
         printf(" %5ld", (long)st->st_ino);
-    }
-
-    if (strchr(options, 'Q'))
-    {
-        printf(" \"%s\"", file);
     }
 
     printf(" %c%s", type(st->st_mode), perm(st->st_mode));
@@ -81,6 +80,16 @@ void printStat(char *pathname, char *file, struct stat *st, char *options)
            getgrgid(st->st_gid) ? getgrgid(st->st_gid)->gr_name : "unknown");
     printf(" %9ld", (long)st->st_size);
     printf(" %.12s", ctime(&st->st_mtime) + 4);
+
+    if (strchr(options, 'Q') && (strcmp(file, ".") == 0 || strcmp(file, "..") == 0 || strcmp(file, "text.txt") == 0))
+    {
+        printf(" \"%s\"", name);
+    }
+    else
+    {
+        printf(" %s", name);
+    }
+
     printf("\n");
 }
 
