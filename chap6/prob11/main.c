@@ -22,7 +22,6 @@ int main(int argc, char **argv)
 
     char *options = "";
 
-    // 명령어 옵션을 처리
     if (argc > 1 && argv[1][0] == '-')
     {
         options = argv[1] + 1;
@@ -57,29 +56,32 @@ int main(int argc, char **argv)
 
 void printStat(char *pathname, char *file, struct stat *st, char *options)
 {
-    // 명령어 옵션에 따라 출력
-    if (strchr(options, 'p'))
+    if (strchr(options, 'p') && S_ISDIR(st->st_mode))
     {
-        printf("%s ", S_ISDIR(st->st_mode) ? "/" : "");
+        printf("%s/", file);
+    }
+    else
+    {
+        printf("%s", file);
     }
 
     if (strchr(options, 'i'))
     {
-        printf("%5ld ", (long)st->st_ino);
+        printf(" %5ld", (long)st->st_ino);
     }
 
     if (strchr(options, 'Q'))
     {
-        printf("\"%s\" ", file);
+        printf(" \"%s\"", file);
     }
 
-    printf("%c%s ", type(st->st_mode), perm(st->st_mode));
-    printf("%3ld ", (long)st->st_nlink);
-    printf("%s %s ", getpwuid(st->st_uid) ? getpwuid(st->st_uid)->pw_name : "unknown",
+    printf(" %c%s", type(st->st_mode), perm(st->st_mode));
+    printf(" %3ld", (long)st->st_nlink);
+    printf(" %s %s", getpwuid(st->st_uid) ? getpwuid(st->st_uid)->pw_name : "unknown",
            getgrgid(st->st_gid) ? getgrgid(st->st_gid)->gr_name : "unknown");
-    printf("%9ld ", (long)st->st_size);
-    printf("%.12s ", ctime(&st->st_mtime) + 4);
-    printf("%s\n", file);
+    printf(" %9ld", (long)st->st_size);
+    printf(" %.12s", ctime(&st->st_mtime) + 4);
+    printf("\n");
 }
 
 char type(mode_t mode)
