@@ -21,28 +21,34 @@ int main(int argc, char **argv)
     char path[BUFSIZ + 1];
 
     char *options = "";
-    if (argc >= 3 && argv[1][0] == '-')
+
+    // 명령어 옵션을 처리
+    if (argc > 1 && argv[1][0] == '-')
     {
         options = argv[1] + 1;
-        dir = argc == 3 ? "." : argv[3]; 
+        dir = (argc == 2) ? "." : argv[2];
     }
     else
     {
-        dir = argc == 1 ? "." : argv[1];
+        dir = (argc == 1) ? "." : argv[1];
     }
 
     if ((dp = opendir(dir)) == NULL)
+    {
         perror(dir);
+        exit(1);
+    }
 
     while ((d = readdir(dp)) != NULL)
     {
         sprintf(path, "%s/%s", dir, d->d_name);
         if (lstat(path, &st) < 0)
-            perror(path);
-        else
         {
-            printStat(path, d->d_name, &st, options);
+            perror(path);
+            continue;
         }
+
+        printStat(path, d->d_name, &st, options);
     }
 
     closedir(dp);
@@ -51,33 +57,27 @@ int main(int argc, char **argv)
 
 void printStat(char *pathname, char *file, struct stat *st, char *options)
 {
-   
-    for (int i = 0; i < strlen(options); i++)
+    // 명령어 옵션에 따라 출력
+    if (strchr(options, 'p'))
     {
-        switch (options[i])
-        {
-        case 'p':
-            printf("%s ", strcmp(file, ".") == 0 ? "./" : (strcmp(file, "..") == 0 ? "../" : file));
-            break;
-        case 'i':
-            printf("%5d ", st->st_ino);
-            break;
-        case 'Q':
-            printf("\"%s\" ", strcmp(file, ".") == 0 ? "." : (strcmp(file, "..") == 0 ? ".." : file));
-            break;
-        default:
-       
-            fprintf(stderr, "Unsupported option: -%c\n", options[i]);
-            exit(1);
-        }
+        printf("%s ", S_ISDIR(st->st_mode) ? "/" : "");
     }
 
- 
+    if (strchr(options, 'i'))
+    {
+        printf("%5ld ", (long)st->st_ino);
+    }
+
+    if (strchr(options, 'Q'))
+    {
+        printf("\"%s\" ", file);
+    }
+
     printf("%c%s ", type(st->st_mode), perm(st->st_mode));
-    printf("%3d ", st->st_nlink);
-    printf("%s %s ", getpwuid(st->st_uid)->pw_name,
-           getgrgid(st->st_gid)->gr_name);
-    printf("%9d ", st->st_size);
+    printf("%3ld ", (long)st->st_nlink);
+    printf("%s %s ", getpwuid(st->st_uid) ? getpwuid(st->st_uid)->pw_name : "unknown",
+           getgrgid(st->st_gid) ? getgrgid(st->st_gid)->gr_name : "unknown");
+    printf("%9ld ", (long)st->st_size);
     printf("%.12s ", ctime(&st->st_mtime) + 4);
     printf("%s\n", file);
 }
