@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
             exit(3);
         }
 
-        seek(fd, (id-START_ID)*sizeof(record), SEEK_SET);
+        lseek(fd, (id-START_ID)*sizeof(record), SEEK_SET);
 
         if ((read(fd, (char *) &record, sizeof(record)) > 0) && (record.id != 0))
             printf("Name:%s\t StuID:%d\t Score:%d\n", record.name, record.id, record.score);
