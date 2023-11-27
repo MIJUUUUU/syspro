@@ -14,7 +14,7 @@ int main() {
     int background;
 
     while (1) {
-        printf("Pls input cmd : ");
+        printf("Pls input cmd: ");
         fflush(stdout);
 
         if (fgets(input, sizeof(input), stdin) == NULL) {
@@ -33,19 +33,19 @@ int main() {
             input[strlen(input) - 1] = '\0';
         }
 
-        token = strtok(input, " ");
-        int i = 0;
-
-        while (token != NULL) {
-            args[i++] = token;
-            token = strtok(NULL, " ");
-        }
-
-        args[i] = NULL;
-
         pid_t pid = fork();
 
         if (pid == 0) {
+            token = strtok(input, " ");
+            int i = 0;
+
+            while (token != NULL) {
+                args[i++] = token;
+                token = strtok(NULL, " ");
+            }
+
+            args[i] = NULL;
+
             if (execvp(args[0], args) == -1) {
                 perror("Execution failed");
                 exit(EXIT_FAILURE);
@@ -59,6 +59,8 @@ int main() {
             perror("Fork failed");
             exit(EXIT_FAILURE);
         }
+
+        printf("[%d] Parent process start\n", getpid());
     }
 
     return 0;
