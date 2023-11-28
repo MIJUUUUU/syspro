@@ -27,6 +27,7 @@ int main() {
         if (strlen(input) == 0)
             continue;
 
+		printf("[%d] Parent process start\n", getpid());
         background = 0;
         if (input[strlen(input) - 1] == '&') {
             background = 1;
@@ -36,6 +37,7 @@ int main() {
         pid_t pid = fork();
 
         if (pid == 0) {
+            // 자식 프로세스
             token = strtok(input, " ");
             int i = 0;
 
@@ -51,18 +53,18 @@ int main() {
                 exit(EXIT_FAILURE);
             }
         } else if (pid > 0) {
+            // 부모 프로세스
             if (!background) {
-                int status;
-                waitpid(pid, &status, 0);
+                // 비차단으로 자식 프로세스의 종료 상태 확인
+                waitpid(pid, NULL, WNOHANG);
             }
         } else {
             perror("Fork failed");
             exit(EXIT_FAILURE);
         }
 
-        printf("[%d] Parent process start\n", getpid());
+                printf("Success\n");
     }
-
     return 0;
 }
 
