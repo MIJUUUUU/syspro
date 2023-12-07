@@ -12,38 +12,16 @@ void displayStack(struct node *top);
 
 int main() {
     struct node *top = NULL;
-    int choice, data;
+    int input;
 
-    do {
-        printf("\n1. Push\n");
-        printf("2. Pop\n");
-        printf("3. Display Stack\n");
-        printf("4. Exit\n");
-        printf("Enter your choice: ");
-        scanf("%d", &choice);
-
-        switch (choice) {
-            case 1:
-                printf("Enter data to push: ");
-                scanf("%d", &data);
-                push(&top, data);
-                break;
-            case 2:
-                data = pop(&top);
-                if (data != -1) {
-                    printf("Popped element: %d\n", data);
-                }
-                break;
-            case 3:
-                displayStack(top);
-                break;
-            case 4:
-                printf("Exiting...\n");
-                break;
-            default:
-                printf("Invalid choice. Please enter a valid option.\n");
+    while (1) {
+        if (scanf("%d", &input) != 1) {
+           displayStack(top);
+            break;
         }
-    } while (choice != 4);
+
+        push(&top, input);
+    }
 
     return 0;
 }
@@ -59,8 +37,6 @@ void push(struct node **top, int data) {
     newNode->data = data;
     newNode->next = *top;
     *top = newNode;
-
-    printf("Pushed element: %d\n", data);
 }
 
 int pop(struct node **top) {
@@ -84,7 +60,7 @@ void displayStack(struct node *top) {
         return;
     }
 
-    printf("Stack elements:\n");
+    printf("Print stack\n");
 
     while (top != NULL) {
         printf("%d\n", top->data);
